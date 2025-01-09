@@ -139,20 +139,20 @@ from numpy.random import rand, randint
 def genetic_Alg(airfoil_names):
 
     # generate an initial population, decide how many in pop
-    init_pop = generate_founders(airfoil_names, 5)
+    init_pop = generate_founders(airfoil_names, 5) # creates n # of children, each with a random combination of blade shapes
     eval_fit = []
     for blade in init_pop:
         eval_fit.append(blade_perf(blade)) # check their fitness
 
     # this is all to get the highest fitness airfoil combination to compare in subsequent gen. for convergence
-    index_of_best = eval_fit.index(min(eval_fit))
+    index_of_best = eval_fit.index(min(eval_fit)) # look at the best one
     old_best = init_pop[index_of_best]
     old_gen = init_pop
 
     n = 0 # start the counter
     while n < 5 : #converge if the best value hasn't changed after 5 iterations
         # create a new generation and find their fitnesses
-        new_gen = generate_children(old_gen, eval_fit, airfoil_names)
+        new_gen = generate_children(old_gen, eval_fit, airfoil_names) # new generations are a combination of the best from previous generations
         eval_fit = []
         for blade in new_gen:
             eval_fit.append(blade_perf(blade)) # check their fitness
@@ -166,7 +166,7 @@ def genetic_Alg(airfoil_names):
         else: # if its not then reset it, we'll keep going until the best is the same 5 times in a row
             n = 0
         old_best = new_best
-    # now that we've concerged take the top 3 airfoils
+    # now that we've converged take the top 3 airfoils
     top_3_indices = np.argsort(eval_fit)[0:3]
     top_3_airfoils = [new_gen[i] for i in top_3_indices]
 
@@ -272,7 +272,7 @@ def generate_children(parents, fit_vals, airfoils_list):
         child = parent1[:splice_at] + parent2[splice_at:]
         
         # mutate on a probaility
-        prob = 0.1
+        prob = 0.33 # enter at what probability you want it to mutate
         num = rand() # make a random number between 0 and 1
         if num < prob:
             child[randint(0, len(child))] = airfoils_list[randint(0, len(airfoils_list))] # swap it out with a totally new airfoil

@@ -1,5 +1,5 @@
 
-def calculate_path(path_dict, source, target): # this just takes in your final pointer arrays and gets the results
+def calculate_path(path_dict, source, target):
     current_key = target
     cost = path_dict[target][0]
     path_traveled = []
@@ -19,14 +19,13 @@ def find_shortest_path_with_heap(
         target: int
 ) -> tuple[list[int], float]:
     # make an array which shows where in the minheap objects are, the distance to that point and where you came from to get there
-    pointer_array = {key: [float('inf'), None, None] for key in graph} # initialize the array with space 4V because I have 3 values for every key
-    pointer_array[source] = [0, None, 0] # make the source's distance 0, location at front of min_heap
+    pointer_array = {key: [float('inf'), None, None] for key in graph}# initialize the array with space 4V because I have 3 values for every key
+    pointer_array[source] = [0, None, 0]# make the source's distance 0, location at front of min_heap
     # create the min heap with the starting value as the first one
     min_heap = []
-    
-    for keys, vals in pointer_array.items(): # space complexity of 2V because I add in two things from the pointer array
-        min_heap.append([keys, vals[0]])
-    
+    for keys, things in pointer_array.items():# space complexity of 2V because I add in two things from the pointer array
+        min_heap.append([keys, things[0]])
+        
     # while there are still elements in the heap
     while len(min_heap) != 0:
         node = min_heap[0]# Access the starting point and look at everything it goes to, pop it off the min heap and remember it
@@ -37,20 +36,22 @@ def find_shortest_path_with_heap(
         for path, distance in connections.items():
             current_dist = pointer_array[path][0] # the current distance to this node
             if current_dist > distance + dist_to_node_of_interest : # Anytime the distance is less replace it and push it onto the min heap
-            
-                # find where in the minheap that point is and update the distance
-                loc_in_heap = pointer_array[path][2]
-                min_heap[loc_in_heap][1] = distance + dist_to_node_of_interest
-                pointer_array[path][0] = distance + dist_to_node_of_interest
-                pointer_array[path][1] = node_of_interest
-            sift_up(min_heap, 0, pointer_array) # this is a part of the "append" in dijkstra's psuedocode, it will be at worst log(V)
+                # This shouldnt happen now!! if its in the minheap just update it in the minheap, if not, through it in the back
+                if pointer_array[path][2] == None:
+                    min_heap.append([path, distance + dist_to_node_of_interest])
+                    pointer_array[path]= [distance + dist_to_node_of_interest, node_of_interest, len(min_heap)-1] # update the pointer array with this nodes distance to get to it, previous node, and location in minheap
+                else:
+                    # find where in the minheap that point is and update the distance
+                    loc_in_heap = pointer_array[path][2]
+                    min_heap[loc_in_heap][1] = distance + dist_to_node_of_interest
+                    pointer_array[path][0] = distance + dist_to_node_of_interest
+                    pointer_array[path][1] = node_of_interest
+                sift_up(min_heap, 0, pointer_array)# this is a part of the "append" in dijkstra's psuedocode, it will be at worst log(V)
         swap_pop(min_heap, pointer_array)
         sift_down(min_heap,0, pointer_array) # percolate
-        # make note of what node you came from
-        # exit the while loop
-        # resort the minheap
-        # repeat pulling the first value off the minheap
+        
     nodes_traversed, cost = calculate_path(pointer_array,source, target)
+
     return nodes_traversed, cost
 
 def create_heap(dict, starting_point, pointer):
@@ -137,6 +138,7 @@ def swap_pop(minheap, pointer):
     
     minheap.pop() # pop off last one
 
+
 def find_shortest_path_with_array(
         graph: dict[int, dict[int, float]],
         source: int,
@@ -145,15 +147,13 @@ def find_shortest_path_with_array(
     #p has space complexity 3V, 1 for each vertex key, 2 for the two things in the value
     p = {key: (float('inf'), None) for key in graph} # makes a dictionary in the form {node: (distance to it, node you came from)}
     p[source] = (0, None) # make the source's distance 0
-    H = {}
-    for keys, items in p.items():
-        H[keys] =  items[0] # initialize this ditionary with the source and the distance to it, has the form {node: diistance to it}
+
+    H = {source: p[source][0]} # initialize this ditionary with the source and the distance to it, has the form {node: diistance to it}
     # at worst this will be V*2 because i'm storing 2 values everytime I find a node, and worst case I find all of them
     print(H)
     while len(H) != 0:
         minimum_len_key= min(H, key=H.get) #find the key of the lowest value
-        # if minimum_len_key == target: # if you're at the target then stop!
-        #     break
+    
         H.pop(minimum_len_key) # remove the lowest fromt the priority queue
         connections = graph[minimum_len_key] # get all the connections from that node
         for path, distance in connections.items(): # look at where the node goes to and the distance to them
@@ -167,6 +167,7 @@ def find_shortest_path_with_array(
     
     return list_of_nodes_traveled, cost_of_path
 
+
 graph = {
         0: {1: 2, 2: 1, 3: 4},
         1: {0: 2, 2: 1, 3: 1},
@@ -174,3 +175,5 @@ graph = {
         3: {0: 3, 1: 2, 2: 1}
 }
 print(find_shortest_path_with_heap(graph, 0, 3))
+
+
